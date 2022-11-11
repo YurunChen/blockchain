@@ -27,12 +27,16 @@ func NewBlock(PreBlockHash []byte, Data string) *Block {
 	block.SetHash()
 	return block
 }
+
+// 建立新区块链
 func NewBlockChain() *BlockChain {
 	gensisBlock := GenesisBlock()
 	return &BlockChain{
 		blocks: []*Block{gensisBlock},
 	}
 }
+
+// 创世区块
 func GenesisBlock() *Block {
 	return NewBlock([]byte{}, "一期创世区块")
 
