@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"crypto/sha256"
+	"encoding/binary"
+	"log"
 	"time"
 )
 
@@ -53,5 +56,10 @@ func (block *Block) SetHash() {
 
 // 实现一个辅助函数，实现将uint64转换成[]byte
 func Uint64ToByte(data uint64) []byte {
-
+	var buffer bytes.Buffer
+	err := binary.Write(&buffer, binary.BigEndian, data)
+	if err != nil {
+		log.Panic(err)
+	}
+	return buffer.Bytes()
 }
