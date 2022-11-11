@@ -42,14 +42,25 @@ func NewBlock(PreBlockHash []byte, Data string) *Block {
 
 func (block *Block) SetHash() {
 	var blockinfo []byte
-	blockinfo = append(blockinfo, Uint64ToByte(block.Version)...)
-	blockinfo = append(blockinfo, block.PrevBlockHash...)
-	blockinfo = append(blockinfo, block.MerkleRoot...)
-	blockinfo = append(blockinfo, Uint64ToByte(block.TimeStamp)...)
-	blockinfo = append(blockinfo, Uint64ToByte(block.Difficulty)...)
-	blockinfo = append(blockinfo, Uint64ToByte(block.Nonce)...)
-	blockinfo = append(blockinfo, block.CurBlockHash...)
-	blockinfo = append(blockinfo, block.Data...)
+	//blockinfo = append(blockinfo, Uint64ToByte(block.Version)...)
+	//blockinfo = append(blockinfo, block.PrevBlockHash...)
+	//blockinfo = append(blockinfo, block.MerkleRoot...)
+	//blockinfo = append(blockinfo, Uint64ToByte(block.TimeStamp)...)
+	//blockinfo = append(blockinfo, Uint64ToByte(block.Difficulty)...)
+	//blockinfo = append(blockinfo, Uint64ToByte(block.Nonce)...)
+	//blockinfo = append(blockinfo, block.CurBlockHash...)
+	//blockinfo = append(blockinfo, block.Data...)
+	tmp := [][]byte{
+		Uint64ToByte(block.Version),
+		block.PrevBlockHash,
+		Uint64ToByte(block.TimeStamp),
+		Uint64ToByte(block.Difficulty),
+		Uint64ToByte(block.Nonce),
+		block.CurBlockHash,
+		block.Data,
+	}
+	//将二维的切片数组连接起来，返回一个一维的切片数组
+	blockinfo = bytes.Join(tmp, []byte(""))
 	hash := sha256.Sum256(blockinfo)
 	block.CurBlockHash = hash[:]
 }
