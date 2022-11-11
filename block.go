@@ -36,7 +36,13 @@ func NewBlock(PreBlockHash []byte, Data string) *Block {
 		CurBlockHash:  []byte{}, //先填空，之后再计算
 		Data:          []byte(Data),
 	}
-	block.SetHash()
+	//block.SetHash()
+	proofOfWork := NewProofOfWork(block)
+	hash, nonce := proofOfWork.Run()
+	//查找目标的随机数，不断的哈希运算
+	block.CurBlockHash = hash
+	//根据挖矿解决对区块数据进行更新
+	block.Nonce = nonce
 	return block
 }
 

@@ -19,3 +19,8 @@ func NewProofOfWork(block *Block) *ProofOfWork {
 	pow.target = tmpInt
 	return pow
 }
+
+func (ProofOfWork *ProofOfWork) Run() ([]byte, uint64) {
+	//TODO
+	return []byte("hello world"), 10
+}
