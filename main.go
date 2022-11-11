@@ -35,6 +35,12 @@ func NewBlockChain() *BlockChain {
 		blocks: []*Block{gensisBlock},
 	}
 }
+func (blockChain *BlockChain) AddBlock(data string) {
+	lastBlock := blockChain.blocks[len(blockChain.blocks)-1]
+	prevHash := lastBlock.CurBlockHash
+	block := NewBlock(prevHash, data)
+	blockChain.blocks = append(blockChain.blocks, block)
+}
 
 // 创世区块
 func GenesisBlock() *Block {
@@ -49,6 +55,8 @@ func (block *Block) SetHash() {
 }
 func main() {
 	blockChain := NewBlockChain()
+	blockChain.AddBlock("区块2")
+	blockChain.AddBlock("区块3")
 	for i, block := range blockChain.blocks {
 		fmt.Printf("===============当前区块高度%d==============\n", i)
 		fmt.Printf("前区块哈希值:%x\n", block.PrevBlockHash)
