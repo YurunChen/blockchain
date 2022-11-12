@@ -80,3 +80,7 @@ func Uint64ToByte(data uint64) []byte {
 	}
 	return buffer.Bytes()
 }
+func (block *Block) toByte() []byte {
+	//TODO
+	return []byte{}
+}

@@ -30,6 +30,7 @@ func (pow *ProofOfWork) Run() ([]byte, uint64) {
 	var hash [32]byte
 	//1.拼接数据
 	block := pow.block
+	fmt.Println("开始挖矿！")
 	for {
 		tmp := [][]byte{
 			Uint64ToByte(block.Version),
