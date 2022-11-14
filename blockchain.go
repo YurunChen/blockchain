@@ -168,12 +168,17 @@ func (bc *BlockChain) FindUTXOs(address string) []TXOutput {
 					UTXO = append(UTXO, output)
 				}
 			}
-			//遍历input,找打自己花费过的utxo的集合（把自己消耗过的标示出来）
-			for _, input := range tx.TXInput {
-				if input.Sig == address {
-					indexArray := spentOutput[string(tx.TXID)]
-					indexArray = append(indexArray, input.Index)
+			//如果是挖矿交易，直接跳过
+			if !tx.IsCoinBase() {
+				//遍历input,找打自己花费过的utxo的集合（把自己消耗过的标示出来）
+				for _, input := range tx.TXInput {
+					if input.Sig == address {
+						indexArray := spentOutput[string(tx.TXID)]
+						indexArray = append(indexArray, input.Index)
+					}
 				}
+			} else {
+				fmt.Printf("这是CoinBase,不做input遍历！")
 			}
 		}
 		if len(block.PrevHash) == 0 {

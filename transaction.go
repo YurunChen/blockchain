@@ -48,3 +48,12 @@ func NewCoinBaseTX(address string, data string) *Transactions {
 	transaction.SetHash()
 	return &transaction
 }
+func (tx *Transactions) IsCoinBase() bool {
+	if len(tx.TXInput) == 1 {
+		input := tx.TXInput[0]
+		if !bytes.Equal(input.TXid, []byte{}) || input.Index != -1 {
+			return false
+		}
+	}
+	return true
+}
