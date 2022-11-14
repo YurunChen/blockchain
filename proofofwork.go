@@ -36,9 +36,8 @@ func NewProofOfWork(block *Block) *ProofOfWork {
 	return &pow
 }
 
-//
 //3. 提供计算不断计算hash的哈数
-//
+
 //- Run()
 
 func (pow *ProofOfWork) Run() ([]byte, uint64) {
@@ -63,7 +62,8 @@ func (pow *ProofOfWork) Run() ([]byte, uint64) {
 			Uint64ToByte(block.TimeStamp),
 			Uint64ToByte(block.Difficulty),
 			Uint64ToByte(nonce),
-			block.Data,
+			//只对区块头作哈希值，区块体通过MerkleRoot产生影响
+			//block.Data,
 		}
 
 		//将二维的切片数组链接起来，返回一个一维的切片
@@ -103,3 +103,5 @@ func (pow *ProofOfWork) Run() ([]byte, uint64) {
 //4. 提供一个校验函数
 //
 //- IsValid()
+
+//

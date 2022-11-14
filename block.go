@@ -1,14 +1,14 @@
 package main
 
 import (
-	"time"
 	"bytes"
 	"encoding/binary"
-	"log"
 	"encoding/gob"
+	"log"
+	"time"
 )
 
-//0. 定义结构
+// 0. 定义结构
 type Block struct {
 	//1.版本号
 	Version uint64
@@ -26,14 +26,15 @@ type Block struct {
 	//a. 当前区块哈希,正常比特币区块中没有当前区块的哈希，我们为了是方便做了简化！
 	Hash []byte
 	//b. 数据
-	Data []byte
+	//Data []byte
+	Transaction []*Transactions
 }
 
 //1. 补充区块字段
 //2. 更新计算哈希函数
 //3. 优化代码
 
-//实现一个辅助函数，功能是将uint64转成[]byte
+// 实现一个辅助函数，功能是将uint64转成[]byte
 func Uint64ToByte(num uint64) []byte {
 	var buffer bytes.Buffer
 
@@ -45,8 +46,8 @@ func Uint64ToByte(num uint64) []byte {
 	return buffer.Bytes()
 }
 
-//2. 创建区块
-func NewBlock(data string, prevBlockHash []byte) *Block {
+// 2. 创建区块
+func NewBlock(txs []*Transactions, prevBlockHash []byte) *Block {
 	block := Block{
 		Version:    00,
 		PrevHash:   prevBlockHash,
@@ -55,7 +56,8 @@ func NewBlock(data string, prevBlockHash []byte) *Block {
 		Difficulty: 0, //随便填写的无效值
 		Nonce:      0, //同上
 		Hash:       []byte{},
-		Data:       []byte(data),
+		//Data:       []byte(data),
+		Transaction: txs,
 	}
 
 	//block.SetHash()
@@ -71,7 +73,7 @@ func NewBlock(data string, prevBlockHash []byte) *Block {
 	return &block
 }
 
-//序列化
+// 序列化
 func (block *Block) Serialize() []byte {
 	var buffer bytes.Buffer
 
@@ -89,7 +91,7 @@ func (block *Block) Serialize() []byte {
 	return buffer.Bytes()
 }
 
-//反序列化
+// 反序列化
 func Deserialize(data []byte) Block {
 
 	decoder := gob.NewDecoder(bytes.NewReader(data))
@@ -117,7 +119,7 @@ func (block *Block) SetHash() {
 	blockInfo = append(blockInfo, Uint64ToByte(block.Difficulty)...)
 	blockInfo = append(blockInfo, Uint64ToByte(block.Nonce)...)
 	blockInfo = append(blockInfo, block.Data...)
-	*/
+*/
 /*
 tmp := [][]byte{
 	Uint64ToByte(block.Version),
@@ -138,3 +140,7 @@ hash := sha256.Sum256(blockInfo)
 block.Hash = hash[:]
 }
 */
+func (block *Block) MakeMerkleRoot() []byte {
+	//TODO
+	return []byte{}
+}

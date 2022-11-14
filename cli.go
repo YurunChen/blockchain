@@ -8,7 +8,7 @@ import (
 //这是一个用来接收命令行参数并且控制区块链操作的文件
 
 type CLI struct {
-	//bc *BlockChain
+	bc *BlockChain
 }
 
 const Usage = `
@@ -16,6 +16,7 @@ const Usage = `
 	addBlock --data DATA     "添加区块"
 	printChain               "正向打印区块链"
 	printChainR              "反向打印区块链"
+	getBalance --qddress ADDRESS "获取指定地址的余额"
 `
 
 //接受参数的动作，我们放到一个函数中
@@ -36,8 +37,8 @@ func (cli *CLI) Run() {
 	switch cmd {
 	case "createBlockChain":
 		fmt.Printf("创建区块链!\n")
-		//address := os.Args[2]
-		cli.CreateBlockChain()
+		address := os.Args[2]
+		cli.CreateBlockChain(address)
 	case "addBlock":
 		//3. 执行相应动作
 		fmt.Printf("添加区块\n")
@@ -59,6 +60,12 @@ func (cli *CLI) Run() {
 	case "printChainR":
 		fmt.Printf("反向打印区块\n")
 		cli.PrinBlockChainReverse()
+	case "getBalance":
+		fmt.Printf("获取余额\n")
+		if len(args) == 4 && args[2] == "--address" {
+			address := args[3]
+			cli.GetBalance(address)
+		}
 	default:
 		fmt.Printf("无效的命令，请检查!\n")
 		fmt.Printf(Usage)

@@ -23,8 +23,8 @@ type BlockChain struct {
 const blockChainDb = "blockChain.db"
 const blockBucket = "blockBucket"
 
-//5. 定义一个区块链
-func CreateBlockChain() *BlockChain {
+// 5. 定义一个区块链
+func CreateBlockChain(address string) *BlockChain {
 	//return &BlockChain{
 	//	blocks: []*Block{genesisBlock},
 	//}
@@ -50,7 +50,7 @@ func CreateBlockChain() *BlockChain {
 		}
 
 		//创建一个创世块，并作为第一个区块添加到区块链中
-		genesisBlock := GenesisBlock()
+		genesisBlock := GenesisBlock(address)
 
 		//3. 写数据
 		//hash作为key， block的字节流作为value，尚未实现
@@ -69,7 +69,7 @@ func CreateBlockChain() *BlockChain {
 	return &BlockChain{db, lastHash}
 }
 
-//只是返回区块链实例，不创建
+// 只是返回区块链实例，不创建
 func NewBlockChain() *BlockChain {
 	//return &BlockChain{
 	//	blocks: []*Block{genesisBlock},
@@ -102,13 +102,14 @@ func NewBlockChain() *BlockChain {
 	return &BlockChain{db, lastHash}
 }
 
-//定义一个创世块
-func GenesisBlock() *Block {
-	return NewBlock("Go一期创世块，老牛逼了！", []byte{})
+// 定义一个创世块
+func GenesisBlock(address string) *Block {
+	coinbase := NewCoinBaseTX(address, "一期创世块")
+	return NewBlock([]*Transactions{coinbase}, []byte{})
 }
 
-//5. 添加区块
-func (bc *BlockChain) AddBlock(data string) {
+// 5. 添加区块
+func (bc *BlockChain) AddBlock(transaction []*Transactions) {
 	//如何获取前区块的哈希呢？？
 	db := bc.db         //区块链数据库
 	lastHash := bc.tail //最后一个区块的哈希
@@ -122,7 +123,7 @@ func (bc *BlockChain) AddBlock(data string) {
 		}
 
 		//a. 创建新的区块
-		block := NewBlock(data, lastHash)
+		block := NewBlock(transaction, lastHash)
 
 		//b. 添加到区块链db中
 		//hash作为key， block的字节流作为value，尚未实现
@@ -160,9 +161,14 @@ func (bc *BlockChain) Printchain() {
 			fmt.Printf("难度值(随便写的）: %d\n", block.Difficulty)
 			fmt.Printf("随机数 : %d\n", block.Nonce)
 			fmt.Printf("当前区块哈希值: %x\n", block.Hash)
-			fmt.Printf("区块数据 :%s\n", block.Data)
+			fmt.Printf("区块数据 :%s\n", block.Transaction[0].TXInput[0].Sig)
 			return nil
 		})
 		return nil
 	})
+}
+func (bc *BlockChain) FindUTXO(address string) []TXOutput {
+	var UTXO []TXOutput
+	//TODO
+	return UTXO
 }

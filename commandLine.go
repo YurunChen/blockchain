@@ -2,8 +2,8 @@ package main
 
 import "fmt"
 
-func (cli *CLI) CreateBlockChain() {
-	bc := CreateBlockChain()
+func (cli *CLI) CreateBlockChain(address string) {
+	bc := CreateBlockChain(address)
 
 	if bc == nil {
 		return
@@ -21,8 +21,16 @@ func (cli *CLI) AddBlock(data string) {
 
 	defer bc.db.Close()
 
-	bc.AddBlock(data)
+	//bc.AddBlock(data) TODO
 	fmt.Printf("添加区块成功！\n")
+}
+func (cli *CLI) GetBalance(address string) {
+	utxos := cli.bc.FindUTXO(address)
+	total := 0.0
+	for _, utxo := range utxos {
+		total += utxo.value
+	}
+	fmt.Printf("\"%s\"的余额为%f\n", address, total)
 }
 
 // 正向打印
@@ -64,7 +72,7 @@ func (cli *CLI) PrinBlockChainReverse() {
 		fmt.Printf("难度值(随便写的）: %d\n", block.Difficulty)
 		fmt.Printf("随机数 : %d\n", block.Nonce)
 		fmt.Printf("当前区块哈希值: %x\n", block.Hash)
-		fmt.Printf("区块数据 :%s\n", block.Data)
+		fmt.Printf("区块数据 :%s\n", block.Transaction[0].TXInput[0].Sig)
 
 		if len(block.PrevHash) == 0 {
 			fmt.Printf("区块链遍历结束！")

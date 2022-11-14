@@ -8,8 +8,8 @@ import (
 
 const reward = 12.5
 
-// 1.定义交易结构
-type Transaction struct {
+// Transactions 1.定义交易结构
+type Transactions struct {
 	TXID     []byte
 	TXInput  []TXInput
 	TXOutput []TXOutput
@@ -29,7 +29,7 @@ type TXOutput struct {
 	PubKeyHash string
 }
 
-func (tx *Transaction) SetHash() {
+func (tx *Transactions) SetHash() {
 	var buffer bytes.Buffer
 	encoder := gob.NewEncoder(&buffer)
 	err := encoder.Encode(tx)
@@ -40,10 +40,10 @@ func (tx *Transaction) SetHash() {
 	hash := sha256.Sum256(data)
 	tx.TXID = hash[:]
 }
-func NewCoinBaseTX(address string, data string) *Transaction {
+func NewCoinBaseTX(address string, data string) *Transactions {
 	input := TXInput{[]byte{}, -1, data}
 	output := TXOutput{reward, address}
 	//对于挖矿交易来说，只有一个input和output
-	transaction := Transaction{[]byte{}, []TXInput{input}, []TXOutput{output}}
+	transaction := Transactions{[]byte{}, []TXInput{input}, []TXOutput{output}}
 	return &transaction
 }
