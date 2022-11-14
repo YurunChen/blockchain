@@ -23,8 +23,7 @@ type BlockChain struct {
 const blockChainDb = "blockChain.db"
 const blockBucket = "blockBucket"
 
-// 5. 定义一个区块链
-func CreateBlockChain(address string) *BlockChain {
+func NewBlockChain(address string) *BlockChain {
 	//return &BlockChain{
 	//	blocks: []*Block{genesisBlock},
 	//}
@@ -43,58 +42,32 @@ func CreateBlockChain(address string) *BlockChain {
 	//将要操作数据库（改写）
 	db.Update(func(tx *bolt.Tx) error {
 		//2. 找到抽屉bucket(如果没有，就创建）
-		//没有抽屉，我们需要创建
-		bucket, err := tx.CreateBucket([]byte(blockBucket))
-		if err != nil {
-			log.Panic("创建bucket(b1)失败")
-		}
-
-		//创建一个创世块，并作为第一个区块添加到区块链中
-		genesisBlock := GenesisBlock(address)
-
-		//3. 写数据
-		//hash作为key， block的字节流作为value，尚未实现
-		bucket.Put(genesisBlock.Hash, genesisBlock.Serialize())
-		bucket.Put([]byte("LastHashKey"), genesisBlock.Hash)
-		lastHash = genesisBlock.Hash
-
-		////这是为了读数据测试，马上删掉,套路!
-		//blockBytes := bucket.Get(genesisBlock.Hash)
-		//block := Deserialize(blockBytes)
-		//fmt.Printf("block info : %s\n", block)
-
-		return nil
-	})
-
-	return &BlockChain{db, lastHash}
-}
-
-// 只是返回区块链实例，不创建
-func NewBlockChain() *BlockChain {
-	//return &BlockChain{
-	//	blocks: []*Block{genesisBlock},
-	//}
-
-	//最后一个区块的哈希， 从数据库中读出来的
-	var lastHash []byte
-
-	//1. 打开数据库
-	db, err := bolt.Open(blockChainDb, 0600, nil)
-	//defer db.Close()
-
-	if err != nil {
-		log.Panic("打开数据库失败！")
-	}
-
-	//将要操作数据库（改写）
-	db.View(func(tx *bolt.Tx) error {
-		//2. 找到抽屉bucket(如果没有，就创建）
 		bucket := tx.Bucket([]byte(blockBucket))
 		if bucket == nil {
-			log.Panic(err)
-		}
+			//没有抽屉，我们需要创建
+			bucket, err = tx.CreateBucket([]byte(blockBucket))
+			if err != nil {
+				log.Panic("创建bucket(b1)失败")
+			}
 
-		lastHash = bucket.Get([]byte("LastHashKey"))
+			//创建一个创世块，并作为第一个区块添加到区块链中
+			genesisBlock := GenesisBlock(address)
+			//fmt.Printf("genesisBlock :%s\n", genesisBlock)
+
+			//3. 写数据
+			//hash作为key， block的字节流作为value，尚未实现
+			bucket.Put(genesisBlock.Hash, genesisBlock.Serialize())
+			bucket.Put([]byte("LastHashKey"), genesisBlock.Hash)
+			lastHash = genesisBlock.Hash
+
+			////这是为了读数据测试，马上删掉,套路!
+			//blockBytes := bucket.Get(genesisBlock.Hash)
+			//block := Deserialize(blockBytes)
+			//fmt.Printf("block info : %s\n", block)
+
+		} else {
+			lastHash = bucket.Get([]byte("LastHashKey"))
+		}
 
 		return nil
 	})
@@ -144,14 +117,14 @@ func (bc *BlockChain) Printchain() {
 		// Assume bucket exists and has keys
 		b := tx.Bucket([]byte("blockBucket"))
 
-		//从第一个key-> value 进行遍历，到最后一个固定的key时直接返回
+		//从第一个key-> Value 进行遍历，到最后一个固定的key时直接返回
 		b.ForEach(func(k, v []byte) error {
 			if bytes.Equal(k, []byte("LastHashKey")) {
 				return nil
 			}
 
 			block := Deserialize(v)
-			//fmt.Printf("key=%x, value=%s\n", k, v)
+			//fmt.Printf("key=%x, Value=%s\n", k, v)
 			fmt.Printf("=============== 区块高度: %d ==============\n", blockHeight)
 			blockHeight++
 			fmt.Printf("版本号: %d\n", block.Version)
@@ -167,8 +140,46 @@ func (bc *BlockChain) Printchain() {
 		return nil
 	})
 }
-func (bc *BlockChain) FindUTXO(address string) []TXOutput {
+
+// 根据需求找到合理的utxo
+func (bc *BlockChain) FindUTXOs(address string) []TXOutput {
 	var UTXO []TXOutput
-	//TODO
+	spentOutput := make(map[string][]int64)
+	it := bc.NewIterator()
+	for {
+		block := it.Next()
+		for _, tx := range block.Transaction {
+			fmt.Printf("current txid: %x\n", tx.TXID)
+			//如果当前的交易ID存在于我们已经表示的map,那么说明这个交易里面有消耗过的output
+		OUTPUT:
+			for i, output := range tx.TXOutput {
+				fmt.Printf("current index:%d\n", i)
+				if spentOutput[string(tx.TXID)] != nil {
+					for _, j := range spentOutput[string(tx.TXID)] {
+						if int64(i) == j {
+							//当前准备的output已经消耗过了，不要再加了
+							continue OUTPUT
+
+						}
+					}
+
+				}
+				if output.PubKeyHash == address {
+					UTXO = append(UTXO, output)
+				}
+			}
+			//遍历input,找打自己花费过的utxo的集合（把自己消耗过的标示出来）
+			for _, input := range tx.TXInput {
+				if input.Sig == address {
+					indexArray := spentOutput[string(tx.TXID)]
+					indexArray = append(indexArray, input.Index)
+				}
+			}
+		}
+		if len(block.PrevHash) == 0 {
+			break
+		}
+	}
 	return UTXO
+
 }

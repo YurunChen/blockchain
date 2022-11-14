@@ -24,7 +24,7 @@ type TXInput struct {
 }
 type TXOutput struct {
 	//转账金额
-	value float64
+	Value float64
 	//锁定脚本，用地址模拟
 	PubKeyHash string
 }
@@ -45,5 +45,6 @@ func NewCoinBaseTX(address string, data string) *Transactions {
 	output := TXOutput{reward, address}
 	//对于挖矿交易来说，只有一个input和output
 	transaction := Transactions{[]byte{}, []TXInput{input}, []TXOutput{output}}
+	transaction.SetHash()
 	return &transaction
 }

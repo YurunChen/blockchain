@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 func (cli *CLI) CreateBlockChain(address string) {
-	bc := CreateBlockChain(address)
+	bc := NewBlockChain(address)
 
 	if bc == nil {
 		return
@@ -13,7 +13,7 @@ func (cli *CLI) CreateBlockChain(address string) {
 }
 
 func (cli *CLI) AddBlock(data string) {
-	bc := NewBlockChain()
+	bc := NewBlockChain(data)
 
 	if bc == nil {
 		return
@@ -25,39 +25,25 @@ func (cli *CLI) AddBlock(data string) {
 	fmt.Printf("添加区块成功！\n")
 }
 func (cli *CLI) GetBalance(address string) {
-	utxos := cli.bc.FindUTXO(address)
+	utxos := cli.bc.FindUTXOs(address)
 	total := 0.0
 	for _, utxo := range utxos {
-		total += utxo.value
+		total += utxo.Value
 	}
 	fmt.Printf("\"%s\"的余额为%f\n", address, total)
 }
 
 // 正向打印
 func (cli *CLI) PrinBlockChain() {
-	bc := NewBlockChain()
-
-	if bc == nil {
-		return
-	}
-
-	defer bc.db.Close()
-	bc.Printchain()
+	cli.bc.Printchain()
 	fmt.Printf("打印区块链完成\n")
 }
 
 // 反向打印
 func (cli *CLI) PrinBlockChainReverse() {
-	bc := NewBlockChain()
-
-	if bc == nil {
-		return
-	}
-
-	defer bc.db.Close()
 
 	//创建迭代器
-	it := bc.NewIterator()
+	it := cli.bc.NewIterator()
 
 	//调用迭代器，返回我们的每一个区块数据
 	for {
